@@ -1,0 +1,49 @@
+﻿@page "/customerregister"
+@inject HttpClient Http
+@using Labb2Fullstack.Core.Models
+
+<h3>Registrera Ny Kund</h3>
+
+<EditForm Model="newCustomer" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Förnamn</label>
+        <InputText class="form-control" @bind-Value="newCustomer.Förnamn" />
+    </div>
+    <div class="mb-3">
+        <label>Efternamn</label>
+        <InputText class="form-control" @bind-Value="newCustomer.Efternamn" />
+    </div>
+    <div class="mb-3">
+        <label>Email</label>
+        <InputText class="form-control" @bind-Value="newCustomer.Email" />
+    </div>
+    <div class="mb-3">
+        <label>Mobilnummer</label>
+        <InputText class="form-control" @bind-Value="newCustomer.Mobilnummer" />
+    </div>
+    <div class="mb-3">
+        <label>Adress</label>
+        <InputText class="form-control" @bind-Value="newCustomer.Adress" />
+    </div>
+    <button type="submit" class="btn btn-primary">Registrera</button>
+    <a class="btn btn-secondary ms-2" href="/customers">Avbryt</a>
+</EditForm>
+
+@code {
+    private Customer newCustomer = new();
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PostAsJsonAsync("api/customers", newCustomer);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/customers");
+        }
+    }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+}

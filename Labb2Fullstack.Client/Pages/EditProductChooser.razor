@@ -1,0 +1,48 @@
+﻿@page "/editproduct"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Labb2Fullstack.Core.Models
+
+<h3>Välj en Produkt att Redigera</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Produktnummer</th>
+            <th>Produktnamn</th>
+            <th>Åtgärder</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in products)
+        {
+            <tr>
+                <td>@product.Id</td>
+                <td>@product.Produktnummer</td>
+                <td>@product.Produktnamn</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => EditProduct(product.Id)">Redigera</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Product> products = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Http.GetFromJsonAsync<IEnumerable<Product>>("api/products");
+        if (result != null)
+        {
+            products = result.ToList();
+        }
+    }
+
+    private void EditProduct(int id)
+    {
+        NavigationManager.NavigateTo($"/productedit/{id}");
+    }
+}

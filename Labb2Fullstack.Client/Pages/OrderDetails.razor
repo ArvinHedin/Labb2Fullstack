@@ -1,0 +1,59 @@
+﻿@page "/orderdetails"
+@inject HttpClient Http
+@using Labb2Fullstack.Core.Models
+
+<h3>Hantera Ordrar</h3>
+
+@if (orders == null)
+{
+    <p>Laddar ordrar...</p>
+}
+else
+{
+    <label>Välj en order:</label>
+    <select @onchange="OnOrderSelected" class="form-select">
+        <option value="">-- Välj order --</option>
+        @foreach (var order in orders)
+        {
+            <option value="@order.Id">Order #@order.Id - KundID: @order.CustomerId</option>
+        }
+    </select>
+
+    @if (selectedOrder != null)
+    {
+        <h4>Orderdetaljer</h4>
+        <p><strong>Order ID:</strong> @selectedOrder.Id</p>
+        <p><strong>Kund ID:</strong> @selectedOrder.CustomerId</p>
+        <p><strong>Orderdatum:</strong> @selectedOrder.OrderDatum.ToString("yyyy-MM-dd")</p>
+
+        <h5>Orderrader</h5>
+        <ul>
+            @foreach (var item in selectedOrder.OrderItems)
+            {
+                <li>Produkt ID: @item.ProductId, Antal: @item.Antal</li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private List<Order> orders;
+    private Order selectedOrder;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7105/api/orders");
+    }
+
+    private async Task OnOrderSelected(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int orderId))
+        {
+            selectedOrder = await Http.GetFromJsonAsync<Order>($"https://localhost:7105/api/orders/{orderId}");
+        }
+        else
+        {
+            selectedOrder = null;
+        }
+    }
+}

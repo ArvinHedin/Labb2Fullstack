@@ -1,0 +1,40 @@
+﻿@page "/orderitems"
+@inject HttpClient Http
+@using Labb2Fullstack.Core.Models
+
+<h3>Orderrader</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Order ID</th>
+            <th>Product ID</th>
+            <th>Antal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var orderItem in orderItems)
+        {
+            <tr>
+                <td>@orderItem.Id</td>
+                <td>@orderItem.OrderId</td>
+                <td>@orderItem.ProductId</td>
+                <td>@orderItem.Antal</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<OrderItem> orderItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Http.GetFromJsonAsync<IEnumerable<OrderItem>>("api/orderitems");
+        if (result is not null)
+        {
+            orderItems = result.ToList();
+        }
+    }
+}

@@ -1,0 +1,80 @@
+﻿@page "/customers"
+@inject HttpClient Http
+@using Labb2Fullstack.Core.Models
+
+<h3>Kundlista</h3>
+
+<div class="mb-3">
+    <input @bind="searchEmail" placeholder="Sök kund via e-post..." class="form-control" />
+    <button class="btn btn-primary mt-2" @onclick="SearchCustomers">Sök</button>
+    <button class="btn btn-secondary mt-2 ms-2" @onclick="LoadCustomers">Visa alla</button>
+    <a class="btn btn-success mt-2 ms-2" href="/customerregister">Ny Kund</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Förnamn</th>
+            <th>Efternamn</th>
+            <th>Email</th>
+            <th>Mobilnummer</th>
+            <th>Adress</th>
+            <th>Åtgärder</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cust in customers)
+        {
+            <tr>
+                <td>@cust.Id</td>
+                <td>@cust.Förnamn</td>
+                <td>@cust.Efternamn</td>
+                <td>@cust.Email</td>
+                <td>@cust.Mobilnummer</td>
+                <td>@cust.Adress</td>
+                <td>
+                    <a class="btn btn-sm btn-primary" href="/customeredit/@cust.Id">Redigera</a>
+                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteCustomer(cust.Id)">Ta bort</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Customer> customers = new();
+    private string searchEmail = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCustomers();
+    }
+
+    private async Task LoadCustomers()
+    {
+        var result = await Http.GetFromJsonAsync<IEnumerable<Customer>>("api/customers");
+        if (result is not null)
+            customers = result.ToList();
+    }
+
+    private async Task SearchCustomers()
+    {
+        if (string.IsNullOrWhiteSpace(searchEmail))
+        {
+            await LoadCustomers();
+        }
+        else
+        {
+            var result = await Http.GetFromJsonAsync<IEnumerable<Customer>>($"api/customers/search?email={searchEmail}");
+            if (result is not null)
+                customers = result.ToList();
+        }
+    }
+
+    private async Task DeleteCustomer(int id)
+    {
+        await Http.DeleteAsync($"api/customers/{id}");
+        await LoadCustomers();
+    }
+}

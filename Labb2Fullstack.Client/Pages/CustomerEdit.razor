@@ -1,0 +1,66 @@
+﻿@page "/customeredit/{Id:int}"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Labb2Fullstack.Core.Models
+
+<h3>Redigera Kund</h3>
+
+@if (customer == null)
+{
+    <p>Laddar kundinformation...</p>
+}
+else
+{
+    <EditForm Model="customer" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Förnamn</label>
+            <InputText class="form-control" @bind-Value="customer.Förnamn" />
+        </div>
+        <div class="mb-3">
+            <label>Efternamn</label>
+            <InputText class="form-control" @bind-Value="customer.Efternamn" />
+        </div>
+        <div class="mb-3">
+            <label>Email</label>
+            <InputText class="form-control" @bind-Value="customer.Email" />
+        </div>
+        <div class="mb-3">
+            <label>Mobilnummer</label>
+            <InputText class="form-control" @bind-Value="customer.Mobilnummer" />
+        </div>
+        <div class="mb-3">
+            <label>Adress</label>
+            <InputText class="form-control" @bind-Value="customer.Adress" />
+        </div>
+        <button type="submit" class="btn btn-primary">Spara</button>
+        <button type="button" class="btn btn-secondary ms-2" @onclick="Cancel">Avbryt</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Customer customer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customer = await Http.GetFromJsonAsync<Customer>($"api/customers/{Id}");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PutAsJsonAsync($"api/customers/{Id}", customer);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/customers");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/editcustomer");
+    }
+}

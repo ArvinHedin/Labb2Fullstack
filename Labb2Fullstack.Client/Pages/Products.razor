@@ -1,0 +1,76 @@
+﻿@page "/products"
+@inject HttpClient Http
+@using Labb2Fullstack.Core.Models
+
+<h3>Produkter</h3>
+
+<div class="mb-3">
+    <input @bind="searchTerm" placeholder="Sök produkt..." class="form-control" />
+    <button class="btn btn-primary mt-2" @onclick="SearchProducts">Sök</button>
+    <button class="btn btn-secondary mt-2 ms-2" @onclick="LoadProducts">Visa alla</button>
+    <a class="btn btn-success mt-2 ms-2" href="/productcreate">Ny Produkt</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Produktnummer</th>
+            <th>Produktnamn</th>
+            <th>Pris</th>
+            <th>Status</th>
+            <th>Åtgärder</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in products)
+        {
+            <tr>
+                <td>@product.Produktnummer</td>
+                <td>@product.Produktnamn</td>
+                <td>@product.Pris.ToString("C")</td>
+                <td>@(product.ÄrUtgått ? "Utgått" : "Aktiv")</td>
+                <td>
+                    <a class="btn btn-sm btn-primary" href="/productedit/@product.Id">Redigera</a>
+                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(product.Id)">Ta bort</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Product> products = new();
+    private string searchTerm = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        var result = await Http.GetFromJsonAsync<IEnumerable<Product>>("api/products");
+        if (result is not null)
+            products = result.ToList();
+    }
+
+    private async Task SearchProducts()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            await LoadProducts();
+        }
+        else
+        {
+            var result = await Http.GetFromJsonAsync<IEnumerable<Product>>($"api/products/search?query={searchTerm}");
+            if (result is not null)
+                products = result.ToList();
+        }
+    }
+
+    private async Task DeleteProduct(int id)
+    {
+        await Http.DeleteAsync($"api/products/{id}");
+        await LoadProducts();
+    }
+}

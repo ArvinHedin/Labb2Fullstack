@@ -1,0 +1,40 @@
+﻿@page "/orders"
+@inject HttpClient Http
+@using Labb2Fullstack.Core.Models
+
+<h3>Orderlista</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Kund</th>
+            <th>Orderdatum</th>
+            <th>Antal varor</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in orders)
+        {
+            <tr>
+                <td>@order.Id</td>
+                <td>@order.Customer.Förnamn @order.Customer.Efternamn</td>
+                <td>@order.OrderDatum.ToString("yyyy-MM-dd")</td>
+                <td>@(order.OrderItems?.Count() ?? 0)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Order> orders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Http.GetFromJsonAsync<IEnumerable<Order>>("api/orders");
+        if (result is not null)
+        {
+            orders = result.ToList();
+        }
+    }
+}

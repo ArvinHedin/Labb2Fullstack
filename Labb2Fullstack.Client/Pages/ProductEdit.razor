@@ -1,0 +1,70 @@
+﻿@page "/productedit/{Id:int}"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Labb2Fullstack.Core.Models
+
+<h3>Redigera Produkt</h3>
+
+@if (product == null)
+{
+    <p>Laddar produktinformation...</p>
+}
+else
+{
+    <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Produktnummer</label>
+            <InputText class="form-control" @bind-Value="product.Produktnummer" />
+        </div>
+        <div class="mb-3">
+            <label>Produktnamn</label>
+            <InputText class="form-control" @bind-Value="product.Produktnamn" />
+        </div>
+        <div class="mb-3">
+            <label>Produktbeskrivning</label>
+            <InputTextArea class="form-control" @bind-Value="product.Produktbeskrivning" />
+        </div>
+        <div class="mb-3">
+            <label>Pris</label>
+            <InputNumber class="form-control" @bind-Value="product.Pris" />
+        </div>
+        <div class="mb-3">
+            <label>Produktkategori</label>
+            <InputText class="form-control" @bind-Value="product.Produktkategori" />
+        </div>
+        <div class="mb-3 form-check">
+            <InputCheckbox class="form-check-input" @bind-Value="product.ÄrUtgått" />
+            <label class="form-check-label">Markera som utgått</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Spara</button>
+        <button type="button" class="btn btn-secondary ms-2" @onclick="Cancel">Avbryt</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Product product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await Http.GetFromJsonAsync<Product>($"api/products/{Id}");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PutAsJsonAsync($"api/products/{Id}", product);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/products");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/editproduct");
+    }
+}

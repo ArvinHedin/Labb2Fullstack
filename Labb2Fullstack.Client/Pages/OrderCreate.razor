@@ -1,0 +1,128 @@
+﻿@page "/ordercreate"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Labb2Fullstack.Core.Models
+
+<h3>Lägg Order</h3>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+@if (products == null)
+{
+    <p>Laddar produkter...</p>
+}
+else
+{
+    <EditForm Model="orderModel" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="customerId" class="form-label">Kund-ID</label>
+            <InputNumber id="customerId" class="form-control" @bind-Value="orderModel.CustomerId" />
+        </div>
+
+        <h4>Välj produkter</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Produkt</th>
+                    <th>Pris</th>
+                    <th>Antal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var prod in products)
+                {
+                    <tr>
+                        <td>@prod.Produktnamn</td>
+                        <td>@prod.Pris.ToString("C")</td>
+                        <td>
+                            <InputNumber class="form-control"
+                            @bind-Value="GetOrderItem(prod.Id).Quantity" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-primary">Lägg Order</button>
+        <button type="button" class="btn btn-secondary ms-2" @onclick="Cancel">Avbryt</button>
+    </EditForm>
+}
+
+@code {
+    private List<Product> products;
+    private string errorMessage;
+
+    private OrderCreateModel orderModel = new OrderCreateModel
+        {
+            OrderDatum = DateTime.Now,
+            OrderItems = new List<OrderItemCreateModel>()
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Http.GetFromJsonAsync<IEnumerable<Product>>("api/products");
+        if (result != null)
+        {
+            products = result.ToList();
+            orderModel.OrderItems = products
+                .Select(p => new OrderItemCreateModel { ProductId = p.Id, Quantity = 0 })
+                .ToList();
+        }
+    }
+
+
+    private OrderItemCreateModel GetOrderItem(int productId)
+    {
+        return orderModel.OrderItems.FirstOrDefault(oi => oi.ProductId == productId);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        orderModel.OrderItems = orderModel.OrderItems
+                                .Where(oi => oi.Quantity > 0)
+                                .ToList();
+
+        if (!orderModel.OrderItems.Any())
+        {
+            return;
+        }
+
+
+        orderModel.OrderDatum = DateTime.Now;
+
+
+        var response = await Http.PostAsJsonAsync("api/orders", orderModel);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/orders");
+        }
+        else
+        {
+            errorMessage = "Något gick fel, försök igen.";
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    public class OrderCreateModel
+    {
+        public int CustomerId { get; set; }
+        public DateTime OrderDatum { get; set; }
+        public List<OrderItemCreateModel> OrderItems { get; set; }
+    }
+    public class OrderItemCreateModel
+    {
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+    }
+}

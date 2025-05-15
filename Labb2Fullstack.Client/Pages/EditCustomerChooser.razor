@@ -1,0 +1,50 @@
+﻿@page "/editcustomer"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Labb2Fullstack.Core.Models
+
+<h3>Välj en Kund att Redigera</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Förnamn</th>
+            <th>Efternamn</th>
+            <th>Email</th>
+            <th>Åtgärder</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in customers)
+        {
+            <tr>
+                <td>@customer.Id</td>
+                <td>@customer.Förnamn</td>
+                <td>@customer.Efternamn</td>
+                <td>@customer.Email</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => EditCustomer(customer.Id)">Redigera</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Customer> customers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Http.GetFromJsonAsync<IEnumerable<Customer>>("api/customers");
+        if (result != null)
+        {
+            customers = result.ToList();
+        }
+    }
+
+    private void EditCustomer(int id)
+    {
+        NavigationManager.NavigateTo($"/customeredit/{id}");
+    }
+}

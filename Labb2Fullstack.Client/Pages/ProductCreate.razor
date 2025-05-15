@@ -1,0 +1,68 @@
+﻿@page "/productcreate"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Labb2Fullstack.Core.Models
+
+<h3>Skapa ny produkt</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+<EditForm Model="newProduct" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Produktnummer</label>
+        <InputText class="form-control" @bind-Value="newProduct.Produktnummer" />
+    </div>
+    <div class="mb-3">
+        <label>Produktnamn</label>
+        <InputText class="form-control" @bind-Value="newProduct.Produktnamn" />
+    </div>
+    <div class="mb-3">
+        <label>Produktbeskrivning</label>
+        <InputTextArea class="form-control" @bind-Value="newProduct.Produktbeskrivning" />
+    </div>
+    <div class="mb-3">
+        <label>Pris</label>
+        <InputNumber class="form-control" @bind-Value="newProduct.Pris" />
+    </div>
+    <div class="mb-3">
+        <label>Produktkategori</label>
+        <InputText class="form-control" @bind-Value="newProduct.Produktkategori" />
+    </div>
+    <div class="mb-3 form-check">
+        <InputCheckbox class="form-check-input" @bind-Value="newProduct.ÄrUtgått" />
+        <label class="form-check-label">Markera som utgått</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Skapa Produkt</button>
+    <button type="button" class="btn btn-secondary ms-2" @onclick="Cancel">Avbryt</button>
+</EditForm>
+
+@code {
+    private Product newProduct = new();
+    private string? errorMessage;
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PostAsJsonAsync("/api/products", newProduct);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/products");
+        }
+        else
+        {
+            errorMessage = "Kunde inte spara produkten, försök igen.";
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/products");
+    }
+}
