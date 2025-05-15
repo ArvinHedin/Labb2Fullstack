@@ -17,7 +17,7 @@ namespace Labb2Fullstack.Api.Controllers
             _customerRepository = customerRepository;
         }
 
-        // GET: api/customers
+        
         [HttpGet]
         public async Task<IActionResult> GetAllCustomers()
         {
@@ -25,7 +25,7 @@ namespace Labb2Fullstack.Api.Controllers
             return Ok(customers);
         }
 
-        // GET: api/customers/{id}
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCustomerById(int id)
         {
@@ -35,7 +35,7 @@ namespace Labb2Fullstack.Api.Controllers
             return Ok(customer);
         }
 
-        // GET: api/customers/search?email=exempel@domän.com
+        
         [HttpGet("search")]
         public async Task<IActionResult> SearchCustomers([FromQuery] string email)
         {
@@ -43,7 +43,7 @@ namespace Labb2Fullstack.Api.Controllers
             return Ok(customers);
         }
 
-        // POST: api/customers
+        
         [HttpPost]
         public async Task<IActionResult> CreateCustomer([FromBody] Customer customer)
         {
@@ -51,7 +51,7 @@ namespace Labb2Fullstack.Api.Controllers
             return CreatedAtAction(nameof(GetCustomerById), new { id = createdCustomer.Id }, createdCustomer);
         }
 
-        // PUT: api/customers/{id}
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCustomer(int id, [FromBody] Customer customer)
         {
@@ -62,7 +62,7 @@ namespace Labb2Fullstack.Api.Controllers
             return NoContent();
         }
 
-        // DELETE: api/customers/{id}
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {

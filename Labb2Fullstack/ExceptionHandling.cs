@@ -26,7 +26,7 @@ namespace Labb2Fullstack
         }
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            // Logga felet här om du har en logger
+            
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             return context.Response.WriteAsync(new
